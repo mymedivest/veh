@@ -227,7 +227,7 @@ const priceTxt = v => typeof v === 'number' ? v.toLocaleString('en-MY') : String
 const allPricesShown = () => { const w = rows.filter(r => r.raw[23]); return w.length > 0 && w.every(r => shownPrice.has(String(r.row))); };
 const COLS = [
   { h: 'No', w: 52, v: r => Number(r.no), t: r => `<td>${esc(r.no)}</td>` },
-  { h: 'Completion status', w: 105, hc: true, cc: true,  cls: 'nar', v: r => r.st, t: r => `<td><span class="pill sm ${r.done ? 'g' : 'n'}">${r.st}</span></td>` },
+  { h: 'Completion status', w: 105, hc: true,  cls: 'nar', v: r => r.st, t: r => `<td><span class="pill sm ${r.done ? 'g' : 'n'}">${r.st}</span></td>` },
   { h: 'Vehicle', w: 96, v: r => r.veh, t: r => `<td><b>${esc(r.veh)}</b></td>` },
   { h: 'WS', w: 52, v: r => r.ws, t: r => `<td>${esc(r.ws)}</td>` },
   { h: 'Site', w: 62, v: r => r.site, t: r => `<td>${esc(r.site)}</td>` },
