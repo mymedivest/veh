@@ -6,7 +6,7 @@ const AGE_COL = ['#2fb67c', '#f5c542', '#f28c28', '#e5484d'];   // Completed, < 
 const BUCKETS = [['Completed', AGE_COL[0]], ['< 7 days', AGE_COL[1]], ['7 - 30 days', AGE_COL[2]], ['> 30 days', AGE_COL[3]]];
 const SITE_ALIAS = { MLK: 'MKA', HTJ: 'SBN' };        // old site codes are shown under their new names
 const siteList = () => [...new Set(CONFIG.SITES.map(x => SITE_ALIAS[x] || x))].sort();
-
+ 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let lastActive = Date.now(), lastPing = 0, lastVer = null, tok = sessionStorage.getItem('tok'), role = sessionStorage.getItem('role'), me = sessionStorage.getItem('me'), rows = [], charts = {};
@@ -14,7 +14,7 @@ const ACCESS = { dash: ['webmaster', 'manager', 'staff', 'others'], pl: ['webmas
 const ROLE_LABEL = { webmaster: 'Webmaster', manager: 'Manager', staff: 'Staff', others: 'Viewer' };
 const CREATABLE = { webmaster: ['webmaster', 'manager', 'staff', 'others'], manager: ['manager', 'staff', 'others'] };
 const can = t => (ACCESS[t] || []).includes(role), canEdit = () => can('form');
-
+ 
 Chart.defaults.font.family = "'JetBrains Mono',monospace";
 Chart.defaults.font.size = 11;
 function applyTheme(t) {
@@ -24,7 +24,7 @@ function applyTheme(t) {
   Chart.defaults.borderColor = t === 'dark' ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.1)';
   $('#theme').textContent = t === 'dark' ? '\u2600 Light' : '\u263E Dark';
 }
-
+ 
 /* ---------- API ---------- */
 async function api(action, payload = {}) {
   if (CONFIG.API_URL.startsWith('PASTE')) throw new Error('Set API_URL in script.js first.');
@@ -34,7 +34,7 @@ async function api(action, payload = {}) {
   return j;
 }
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
-
+ 
 /* ---------- auth ---------- */
 $('#loginForm').onsubmit = async e => {
   e.preventDefault();
@@ -52,7 +52,7 @@ function logout(silent, msg) {
   $('#app').hidden = true; $('#login').hidden = false; $('#p').value = ''; $('#loginErr').textContent = msg || '';
 }
 $('#logout').onclick = () => logout();
-
+ 
 /* ---------- data ---------- */
 function norm(t) {
   t = String(t || '').toLowerCase();
@@ -92,7 +92,7 @@ async function load(quiet) {
     if (can('pl') && typeof loadFin === 'function') loadFin(true);
   } catch (e) { if (!quiet) toast(e.message); }
 }
-
+ 
 /* ---------- dashboard ---------- */
 const uniq = k => [...new Set(rows.map(r => r[k]))].sort();
 function fillFilters() {
@@ -104,7 +104,7 @@ function fillFilters() {
 const bucket = r => $('#fAgeBy').value === 'ws' ? r.bW : r.b;   // which ageing the filter and the three charts use
 const filtered = () => rows.filter(r => (!$('#fSite').value || r.site === $('#fSite').value) && (!$('#fWs').value || r.ws === $('#fWs').value) && ($('#fAge').value === '' || bucket(r) === +$('#fAge').value) && (!$('#fCat').value || r.cat === $('#fCat').value));
 const cnt = (l, b) => l.filter(r => bucket(r) === b).length;
-
+ 
 function mk(id, cfg) {
   charts[id]?.destroy();
   cfg.options = { responsive: true, maintainAspectRatio: false, ...cfg.options };
@@ -116,7 +116,7 @@ function stacked(id, key, list) {
     options: { scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { position: 'bottom' } } } });
 }
 const uniqBy = (list, key) => key === 'ws' ? [...new Set(list.map(r => r[key]))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })) : [...new Set(list.map(r => r[key]))].sort((a, b) => list.filter(r => r[key] === b).length - list.filter(r => r[key] === a).length);
-
+ 
 function render() {
   const l = filtered(), n = l.length, open = l.filter(r => !r.done), by = 'age';   // average ageing is always counted from the complaint date
   const avg = open.length ? Math.round(open.reduce((x, r) => x + r[by], 0) / open.length) : 0;
@@ -131,7 +131,7 @@ function render() {
     k('Over 30 days', cnt(l, 3), pct(cnt(l, 3), n) + '% of total', AGE_COL[3]) +
     k('Loaners out', loans, `${l.filter(r => r.loan).length} vehicles with loaner`, '#8b5cf6') +
     k('Avg ageing', avg, 'days since complaint (open)', '#0ea5e9');
-
+ 
   mk('cAge', { type: 'doughnut', data: { labels: BUCKETS.map(b => b[0]), datasets: [{ data: [0, 1, 2, 3].map(i => cnt(l, i)), backgroundColor: BUCKETS.map(b => b[1]), borderWidth: 0 }] },
     options: { cutout: '62%', plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} (${pct(c.raw, n)}%)` } } } } });
   stacked('cSite', 'site', l);
@@ -139,7 +139,7 @@ function render() {
   loaner(); category(); loanCo(); supplier();
 }
 const pct = (a, b) => b ? Math.round(a / b * 1000) / 10 : 0;
-
+ 
 function loaner() {
   const key = $('#loanBy').value, l = filtered(), keys = uniqBy(l, key);
   mk('cLoan', { type: 'bar', data: { labels: keys, datasets: [{ label: 'Loaner ambulances', backgroundColor: '#8b5cf6', data: keys.map(x => l.filter(r => r[key] === x).reduce((s, r) => s + r.loan, 0)) }] },
@@ -159,7 +159,7 @@ function category() {
     options: { indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } } });
   $('#catTable').innerHTML = `<table><tr><th>Category</th><th>Count</th><th>%</th><th></th></tr>${data.map(d => `<tr><td>${esc(d[0])}</td><td>${d[1]}</td><td>${pct(d[1], n)}%</td><td style="width:90px"><div class="bar" style="width:${pct(d[1], n)}%"></div></td></tr>`).join('')}<tr><td><b>Total</b></td><td><b>${n}</b></td><td><b>100%</b></td><td></td></tr></table>`;
 }
-
+ 
 /* ---------- loaner company and panel workshop / supplier charts (same filter style as the category chart) ---------- */
 function breakdown(canvas, scopeId, itemId, tableId, labelsOf) {
   const sc = $(scopeId).value, item = $(itemId);
@@ -214,7 +214,7 @@ function supplier() {
     options: { indexAxis: 'y', scales: { x: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' } } } });
   $('#supTable').innerHTML = `<table><tr><th>Supplier</th><th>Vehicles</th><th>%</th><th>Repair method</th></tr>${data.map(d => `<tr><td>${esc(d.name)}</td><td>${d.c}</td><td>${pct(d.c, n)}%</td><td style="color:var(--mute);font-size:12px">${[...d.by].sort((a, b) => b[1] - a[1]).map(([k, c]) => esc(rm.get(k).name) + ' ' + c).join(' \u00b7 ')}</td></tr>`).join('')}<tr><td><b>Total vehicles</b></td><td><b>${n}</b></td><td></td><td></td></tr></table>`;
 }
-
+ 
 /* ---------- work order list ---------- */
 const cell = (r, i) => String(r.raw[i] ?? '').replace(/\s+/g, ' ').trim();
 const lastLine = r => r.status.split('\n').filter(x => x.trim()).pop() || '';
@@ -222,7 +222,8 @@ const priceOf = r => r.raw[23] === '' || isNaN(Number(r.raw[23])) ? cell(r, 23) 
 /* h = header, v = value used for sorting, t = table cell. Order matches the Summary sheet. */
 const pill = n => `<span class="pill ${n < 7 ? 'g' : n <= 30 ? 'y' : 'r'}">${n}</span>`;
 const priceTxt = v => typeof v === 'number' ? v.toLocaleString('en-MY') : String(v ?? '');
-/* h = header, w = column width in px (change the numbers to resize), cls = tighter spacing for narrow columns, v = sort value, t = cell */
+/* h = header, w = column width in px (change the numbers to resize), cls = tighter spacing for narrow columns,
+   hc: true = centre the header title, cc: true = centre the cell text, v = sort value, t = cell */
 const allPricesShown = () => { const w = rows.filter(r => r.raw[23]); return w.length > 0 && w.every(r => shownPrice.has(String(r.row))); };
 const COLS = [
   { h: 'No', w: 52, v: r => Number(r.no), t: r => `<td>${esc(r.no)}</td>` },
@@ -233,15 +234,15 @@ const COLS = [
   { h: 'WO no', w: 110, v: r => r.wo, t: r => `<td>${esc(r.wo)}</td>` },
   { h: 'Complaint date', w: 92, hc: true, cls: 'nar', v: r => r.cdate, t: r => `<td>${esc(dmy(r.cdate))}</td>` },
   { h: 'Entry date', w: 84, hc: true, cls: 'nar', v: r => cell(r, 6), t: r => `<td>${esc(dmy(cell(r, 6)))}</td>` },
-  { h: 'Workorder ageing', w: 86, cls: 'nar', v: r => r.age, t: r => `<td>${pill(r.age)}</td>` },
-  { h: 'Workshop ageing', w: 78, cls: 'nar', v: r => r.wage, t: r => `<td>${pill(r.wage)}</td>` },
+  { h: 'Workorder ageing', w: 86, hc: true, cls: 'nar', v: r => r.age, t: r => `<td>${pill(r.age)}</td>` },
+  { h: 'Workshop ageing', w: 78, hc: true, cls: 'nar', v: r => r.wage, t: r => `<td>${pill(r.wage)}</td>` },
   { h: 'Loaner company', w: 80, cls: 'nar', v: r => cell(r, 9), t: r => `<td>${esc(cell(r, 9))}</td>` },                          // column J
   { h: 'Loaner quantity', w: 84, cls: 'nar', v: r => numOr(cell(r, 10)) ?? cell(r, 10), t: r => `<td>${esc(cell(r, 10))}</td>` },   // column K
   { h: 'Category', w: 130, v: r => r.cat, t: r => `<td>${esc(r.cat)}</td>` },
-  { h: 'User complaint', w: 440, hc: true, v: r => r.complaint, t: r => `<td>${esc(r.complaint)}</td>` },
-  { h: 'PR no', w: 200, hc: true, v: r => cell(r, 13), t: r => `<td>${esc(cell(r, 13))}</td>` },
-  { h: 'Progress', w: 680, hc: true, v: r => lastLine(r), t: r => `<td class="st"><div class="prog-short">${esc(lastLine(r).slice(0, 140))}</div><div class="prog-full">${esc(r.status.trim())}</div></td>` },   // click the row to read everything
-  { h: 'Mechanic', w: 216, hc: true, v: r => cell(r, 16), t: r => `<td>${esc(cell(r, 16))}</td>` },
+  { h: 'User complaint', w: 440, v: r => r.complaint, t: r => `<td>${esc(r.complaint)}</td>` },
+  { h: 'PR no', w: 200, v: r => cell(r, 13), t: r => `<td>${esc(cell(r, 13))}</td>` },
+  { h: 'Progress', w: 680, v: r => lastLine(r), t: r => `<td class="st"><div class="prog-short">${esc(lastLine(r).slice(0, 140))}</div><div class="prog-full">${esc(r.status.trim())}</div></td>` },   // click the row to read everything
+  { h: 'Mechanic', w: 216, v: r => cell(r, 16), t: r => `<td>${esc(cell(r, 16))}</td>` },
   { h: 'Repair method', w: 130, v: r => cell(r, 17), t: r => `<td>${esc(cell(r, 17))}</td>` },   // column R
   { h: 'Panel workshop / supplier', w: 240, v: r => cell(r, 18), t: r => `<td>${esc(cell(r, 18))}</td>` },
   { h: 'Price (RM)', w: 100, hc: true, hdr: () => allPricesShown() ? '<button class="btn sm" data-hideall="1">Hide</button>' : '<button class="btn sm" data-showall="1">Show</button>', v: r => shownPrice.has(String(r.row)) ? numOr(shownPrice.get(String(r.row))) ?? String(shownPrice.get(String(r.row))) : '',
@@ -251,8 +252,11 @@ const COLS = [
 const openRows = new Set();                        // rows the user has expanded (kept when the data refreshes)
 let sort = { i: COLS.findIndex(c => c.h === 'No'), d: 1 };                          // default: No 1, 2, 3 ...
 const isEmpty = v => v === '' || v == null || (typeof v === 'number' && isNaN(v));
-
-const cellHtml = (c, r) => { const h = c.t(r); return c.cls ? h.replace('<td', `<td class="${c.cls}"`) : h; };
+ 
+const cellHtml = (c, r) => {                         // cls = spacing class, cc = centre the cell text
+  const h = c.t(r), cls = [c.cls, c.cc ? 'cc' : ''].filter(Boolean).join(' ');
+  return !cls ? h : h.startsWith('<td class="') ? h.replace('<td class="', `<td class="${cls} `) : h.replace('<td', `<td class="${cls}"`);
+};
 function renderList() {
   const q = $('#q').value.toLowerCase(), col = COLS[sort.i];
   const l = rows.filter(r => !q || Object.values(r).join(' ').toLowerCase().includes(q)).sort((x, y) => {
@@ -265,10 +269,10 @@ function renderList() {
   const ed = canEdit();
   $('#list').style.width = (COLS.reduce((x, c) => x + c.w, 0) + (ed ? 70 : 0)) + 'px';
   $('#list').innerHTML = '<colgroup>' + COLS.map(c => `<col style="width:${c.w}px">`).join('') + (ed ? '<col style="width:70px">' : '') + '</colgroup><tr>' +
-    COLS.map((c, i) => `<th class="${c.cls || ''}" aria-sort="${i === sort.i ? (sort.d > 0 ? 'ascending' : 'descending') : 'none'}"><button class="sortbtn" data-i="${i}" title="Sort by ${esc(c.h)}">${esc(c.h)}<span>${i === sort.i ? (sort.d > 0 ? '\u25B2' : '\u25BC') : ''}</span></button>${c.hdr ? '<div>' + c.hdr() + '</div>' : ''}</th>`).join('') + (ed ? '<th></th>' : '') + '</tr>' +
+    COLS.map((c, i) => `<th class="${c.cls || ''}${c.hc ? ' hc' : ''}" aria-sort="${i === sort.i ? (sort.d > 0 ? 'ascending' : 'descending') : 'none'}"><button class="sortbtn" data-i="${i}" title="Sort by ${esc(c.h)}">${esc(c.h)}<span>${i === sort.i ? (sort.d > 0 ? '\u25B2' : '\u25BC') : ''}</span></button>${c.hdr ? '<div>' + c.hdr() + '</div>' : ''}</th>`).join('') + (ed ? '<th></th>' : '') + '</tr>' +
     l.map(r => `<tr class="wr${openRows.has(String(r.row)) ? ' open' : ''}" data-r="${r.row}">` + COLS.map(c => cellHtml(c, r)).join('') + (ed ? `<td><button class="btn sm" data-row="${r.row}">Edit</button></td>` : '') + '</tr>').join('');
 }
-
+ 
 /* ---------- form ---------- */
 $('#woForm [name=site]').innerHTML = '<option value="">Select</option>' + siteList().map(x => `<option>${x}</option>`).join('');
 $('#catSel').innerHTML = '<option value="">Select</option>' + CATS.map(c => `<option>${c}</option>`).join('');
@@ -281,7 +285,7 @@ $('#woForm').onsubmit = async e => {
   } catch (err) { toast('Could not save: ' + err.message); }
   b.disabled = false; b.textContent = 'Add to Summary sheet';
 };
-
+ 
 /* ---------- ui wiring ---------- */
 function showTab(t) {
   $$('nav button').forEach(x => x.classList.toggle('on', x.dataset.tab === (t === 'fin' ? 'pl' : t)));
@@ -301,7 +305,7 @@ $('#q').oninput = renderList; $('#refresh').onclick = () => load();
 $('#theme').onclick = () => { applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'); if (rows.length && can('dash')) render(); if (typeof renderFin === 'function') renderFin(); };
 applyTheme(document.documentElement.dataset.theme || 'light');
 setInterval(() => $('#clock').textContent = new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kuala_Lumpur' }) + ' MYT', 1000);
-
+ 
 function start() {
   $('#login').hidden = true; $('#app').hidden = false;
   $('#who').textContent = `${me} (${ROLE_LABEL[role]})`;
@@ -317,7 +321,7 @@ async function poll() {                              // refresh only when the sh
 }
 setInterval(poll, CONFIG.POLL_SEC * 1000);
 document.addEventListener('visibilitychange', poll);
-
+ 
 /* ---------- edit a row (Webmaster, Manager, Staff) ---------- */
 const MAP = { veh: 1, ws: 2, site: 3, wo: 4, cdate: 5, edate: 6, loan: 10, complaint: 12, prNo: 13, prDate: 14, status: 15, mech: 16, repair: 17, panel: 18, panelTel: 19, rTitle: 20, rNo: 21, rDate: 22, done: 24, doneDate: 25, loanCo: 9 };
 let editing = null;
@@ -357,7 +361,7 @@ function openEdit(r) {
   };
   $('#editDlg').showModal();
 }
-
+ 
 /* ---------- users (Webmaster, Manager) ---------- */
 async function loadUsers() {
   try {
@@ -381,7 +385,7 @@ $('#userList').onclick = async e => {
   else p.active = b.dataset.a === 'on';
   try { await api('setUser', p); toast('Updated ' + p.username); loadUsers(); } catch (err) { toast(err.message); }
 };
-
+ 
 /* ---------- automatic sign-out after inactivity ---------- */
 const IDLE_MIN = CONFIG.IDLE_MIN || 10;
 function checkIdle() { if (tok && Date.now() - lastActive > IDLE_MIN * 60000) logout(false, `You were signed out after ${IDLE_MIN} minutes of inactivity.`); }
@@ -390,7 +394,7 @@ function checkIdle() { if (tok && Date.now() - lastActive > IDLE_MIN * 60000) lo
   if (tok && lastActive - lastPing > 60000) { lastPing = lastActive; api('ping').catch(() => {}); }   // tells the server the user is still here
 }, { passive: true }));
 setInterval(checkIdle, 15000);
-
+ 
 /* ---------- price: hidden until a Manager or Webmaster signs in ---------- */
 let priceRow = null;
 function askPrice(row) {
@@ -410,3 +414,4 @@ $('#priceForm').onsubmit = async e => {
   } catch (err) { $('#priceErr').textContent = err.message; f.elements.pass.value = ''; }
   b.disabled = false;
 };
+ 
