@@ -233,7 +233,7 @@ const COLS = [
   { h: 'WO no', w: 110, v: r => r.wo, t: r => `<td>${esc(r.wo)}</td>` },
   { h: 'Complaint date', w: 92, cls: 'nar', v: r => r.cdate, t: r => `<td>${esc(dmy(r.cdate))}</td>` },
   { h: 'Entry date', w: 84, cls: 'nar', v: r => cell(r, 6), t: r => `<td>${esc(dmy(cell(r, 6)))}</td>` },
-  { h: 'Workorder ageing', w: 78, cls: 'nar', v: r => r.age, t: r => `<td>${pill(r.age)}</td>` },
+  { h: 'Workorder ageing', w: 80, cls: 'nar', v: r => r.age, t: r => `<td>${pill(r.age)}</td>` },
   { h: 'Workshop ageing', w: 78, cls: 'nar', v: r => r.wage, t: r => `<td>${pill(r.wage)}</td>` },
   { h: 'Loaner company', w: 80, cls: 'nar', v: r => cell(r, 9), t: r => `<td>${esc(cell(r, 9))}</td>` },                          // column J
   { h: 'Loaner quantity', w: 84, cls: 'nar', v: r => numOr(cell(r, 10)) ?? cell(r, 10), t: r => `<td>${esc(cell(r, 10))}</td>` },   // column K
